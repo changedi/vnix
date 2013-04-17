@@ -11,6 +11,7 @@ Data visualization javascript library.
 ### All chart available ###
 * bubble chart
 * donut chart
+* column chart
 * radar chart
 
 ##### other to be continued #####
