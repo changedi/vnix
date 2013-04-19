@@ -15,9 +15,9 @@ Data visualization javascript library.
 * radar chart (fit with wdm.taobao.com)
 * gender pie chart (fit with wdm.taobao.com)
 
-#### extra use ####
+### Extra use ###
 
 > vnix.date.js is a lib for chinese lunar date call.
 > one can transform a timestamp to a lunar date string so that can do more things like festival filter and so on. 
 
-##### other to be continued #####
+### other to be continued ###
