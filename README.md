@@ -12,6 +12,7 @@ Data visualization javascript library.
 * bubble chart
 * donut chart
 * column chart
+* spline chart
 * radar chart (fit with wdm.taobao.com)
 * gender pie chart (fit with wdm.taobao.com)
 
