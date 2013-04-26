@@ -17,7 +17,7 @@ Data visualization javascript library.
 * gender pie chart (fit with wdm.taobao.com)
 * sparkline chart (with spline,line,bar types for options)
 
-### some demo picture ###
+### Some demo picture ###
 * column: <img width="30%" height="30%" src="http://img01.taobaocdn.com/tfscom/tuitui/T1f0ioXAFfXXXXXXXX.jpg"/>        
 * spline: <img width="30%" height="30%" src="http://img03.taobaocdn.com/tfscom/tuitui/T1px9nXsXgXXXXXXXX.jpg"/>     
 * sparkline: <img src="http://img04.taobaocdn.com/tfscom/tuitui/T1f0KrXqJXXXXXXXXX.jpg"/>   <img src="http://img01.taobaocdn.com/tfscom/tuitui/T1sfenXq4hXXXXXXXX.jpg"/>       
