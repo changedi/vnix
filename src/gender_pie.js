@@ -19,6 +19,7 @@ function GenderPie(container, config, data) {
 		"font-size" : 14
 	}
 
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
 	this.setConfig(config);
 	this.setData(data);
 };
@@ -41,13 +42,17 @@ GenderPie.prototype.setData = function(data) {
 	this.data = data;
 };
 
+GenderPie.prototype.clear = function() {
+	this.raphael.clear();
+};
+
 GenderPie.prototype.draw = function() {
 	var self = this;
 	if (!self.container) {
 		throw new Error("Please set which DOM node to render.");
 	}
 	var conf = self.defaults;
-	var R = Raphael(self.container, conf.width, conf.height), r = conf.radius, data = self.data, colors = conf.lineColor, ox = self.defaults.centerX, oy = self.defaults.centerY, param = {
+	var R = self.raphael, r = conf.radius, data = self.data, colors = conf.lineColor, ox = self.defaults.centerX, oy = self.defaults.centerY, param = {
 		stroke : "#000",
 		"stroke-width" : conf.lineWidth
 	};

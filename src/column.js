@@ -43,6 +43,8 @@ function Column(container, config, data) {
 		'fill-opacity':.75
 	}
 
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
+
 	this.setConfig(config);
 	this.setData(data);
 };
@@ -65,13 +67,17 @@ Column.prototype.setData = function(data) {
 	this.data = data;
 };
 
+Column.prototype.clear = function() {
+	this.raphael.clear();
+};
+
 Column.prototype.draw = function() {
 	var self = this;
 	if (!self.container) {
 		throw new Error("Please set which DOM node to render.");
 	}
 	var conf = self.defaults;
-	var R = Raphael(self.container, conf.width, conf.height), 
+	var R = self.raphael, 
 		data = self.data, 
 		axisStyle = conf.axisStyle, 
 		axisInterval = conf.axisInterval, 
@@ -110,9 +116,9 @@ Column.prototype.draw = function() {
 				(innerBox.ox + innerBox.width), innerBox.oy, axisStyle),
 		labels:[]
 	}, yAxis = {
-		interval : innerBox.height / (axisInterval + 1),
-		line : line(R, innerBox.ox, innerBox.oy, innerBox.ox,
-				(innerBox.oy - innerBox.height), axisStyle),
+		interval : innerBox.height / (axisInterval),
+		// line : line(R, innerBox.ox, innerBox.oy, innerBox.ox,
+		// 		(innerBox.oy - innerBox.height), axisGridStyle),
 		labels:[]
 	};
 
@@ -123,7 +129,7 @@ Column.prototype.draw = function() {
 	for ( var i = 0; i < data.length; i++) {
 		var x = innerBox.ox + xAxis.interval * (i + 1), y = innerBox.oy
 				- innerBox.height;
-		xAxisGrid.line[i] = line(R, x, innerBox.oy, x, y, axisGridStyle);
+		// xAxisGrid.line[i] = line(R, x, innerBox.oy, x, y, axisGridStyle);
 		xAxis.labels[i] = R.text(x - xAxis.interval / 2,
 				innerBox.oy + labelOffsetX, labelText[i % labelText.length])
 				.attr(axisLabelStyle);
@@ -135,22 +141,32 @@ Column.prototype.draw = function() {
 	};
 
 	var yInterval = maxDigit(max);
-	if(yInterval==1){
-		yInterval = parseInt(max / axisInterval);
+	var tmp = Math.round(max/(axisInterval*yInterval));
+	if(tmp<max/(axisInterval*yInterval)){
+		tmp = tmp+0.5;
 	}
+	yInterval = tmp*yInterval;
 	for ( var i = 0; i < axisInterval; i++) {
 		var x = innerBox.ox, y = innerBox.oy - yAxis.interval * (i + 1);
 		yAxisGrid.line[i] = line(R, x, y, x + innerBox.width, y, axisGridStyle);
-		yAxis.labels[i] = R.text(x - labelOffsetY, y,
-				(yInterval*(i+1)).toFixed(0)).attr(axisLabelStyle);
+		// yAxis.labels[i] = R.text(x - labelOffsetY, y,
+		// 		(yInterval*(i+1)).toFixed(0)).attr(axisLabelStyle);
 	}
-	
+
+	var tooltipStyle = {
+		font: '12px Helvetica, Arial', 
+		fill: "#fff"
+	};
+
 	var dataRect = {
 		rect:[],
-		labels:[]
+		labels:[],
+		tooltips:[],
+		frames:[]
 	},
-	rectW = xAxis.interval/2,
-	maxY = max/(yInterval*(axisInterval+1))*innerBox.height;
+	rectW = xAxis.interval/5*3,
+	maxY = max/(yInterval*(axisInterval))*innerBox.height,
+	pos,tx,ty;
 	for (var i=0;i<data.length;i++){
 		var rectH = data[i]/max * maxY;
 		var x = innerBox.ox + xAxis.interval * (i + 1) - xAxis.interval / 2 - rectW/2;
@@ -164,15 +180,36 @@ Column.prototype.draw = function() {
 		if (showDataLabel) {
 			dataRect.labels[i].show();
 		}
+
+		ty = innerBox.oy-rectH/2;
+		if(i==data.length-1){
+			pos = "left";
+			tx = x;
+		} else{
+			pos = "right";
+			tx = x+rectW;
+		}
+		
+		var tooltips = R.set();
+		tooltips.push(R.text(tx,ty,(data[i]/sum*100).toFixed(2)+'%').attr(tooltipStyle).hide());
+		//tooltips.push(R.text(60,27,'bb').attr(tooltipStyle));
+		var frame = R.popup(tx, ty, tooltips, pos).attr({fill: "#000", stroke: "#666", "stroke-width": 2, "fill-opacity": .7}).hide();
+		dataRect.tooltips.push(tooltips);
+		dataRect.frames.push(frame);
+
 		(function(sh,index){
 			sh[0].style.cursor = "pointer";
 			sh[0].onmouseover = function(){
 				sh.animate({'fill-opacity':1},200);
+				dataRect.frames[index].show().toFront();
+				dataRect.tooltips[index][0].show().toFront();
 				if(!showDataLabel)
 					dataRect.labels[index].show();
 			};
 			sh[0].onmouseout = function(){
 				sh.animate({'fill-opacity':.75},200);
+				dataRect.frames[index].hide();
+				dataRect.tooltips[index][0].hide();
 				if(!showDataLabel)
 					dataRect.labels[index].hide();
 			}

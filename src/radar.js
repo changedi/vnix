@@ -45,6 +45,8 @@ function Radar(container, config, data) {
 
 	this.defaults.rotateDeg = 15;
 
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
+
 	this.setConfig(config);
 	this.setData(data);
 };
@@ -67,13 +69,17 @@ Radar.prototype.setData = function(data) {
 	this.data = data;
 };
 
+Radar.prototype.clear = function() {
+	this.raphael.clear();
+};
+
 Radar.prototype.draw = function() {
 	var self = this;
 	if (!self.container) {
 		throw new Error("Please set which DOM node to render.");
 	}
 	var conf = self.defaults;
-	var R = Raphael(self.container, conf.width, conf.height),
+	var R = this.raphael,
 		data = self.data,
 		boxStyle = conf.boxStyle,
 		axisNum = conf.axisNum,
@@ -168,8 +174,7 @@ Radar.prototype.draw = function() {
 		dataShape.data.push(dataCircle);
 		
 		(function(circle,index){
-			console.log(circle);
-			circle[0].style.cursor = "pointer";
+			circle[0].style.cursor = "default";
 			var thisR = circle.attrs.r*animFactor*data[index]/min;
 			var thisFill = circle.attrs.fill;
 			var thisX = circle.attrs.cx;

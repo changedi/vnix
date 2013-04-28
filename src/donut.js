@@ -14,6 +14,12 @@ function Donut(container, config, data) {
 	};
 	this.defaults.labelText = [ 'aaa', 'bbb' ];
 	this.defaults.labelOffset = 50;
+	this.defaults.labelDataStyle = {
+		stroke : "#FFFFFF",
+		"font-size" : 14
+	}
+
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
 
 	this.setConfig(config);
 	this.setData(data);
@@ -37,13 +43,17 @@ Donut.prototype.setData = function(data) {
 	this.data = data;
 };
 
+Donut.prototype.clear = function() {
+	this.raphael.clear();
+};
+
 Donut.prototype.draw = function() {
 	var self = this;
 	if (!self.container) {
 		throw new Error("Please set which DOM node to render.");
 	}
 	var conf = self.defaults;
-	var R = Raphael(self.container, conf.width, conf.height), r = conf.radius, data = self.data, colors = conf.lineColor, ox = self.defaults.centerX, oy = self.defaults.centerY, param = {
+	var R = this.raphael, r = conf.radius, data = self.data, colors = conf.lineColor, ox = self.defaults.centerX, oy = self.defaults.centerY, param = {
 		stroke : "#000",
 		"stroke-width" : conf.lineWidth
 	};
@@ -54,7 +64,8 @@ Donut.prototype.draw = function() {
 	}
 
 	R.customAttributes.arc = function(arc_config) {
-		var value = arc_config.value, total = arc_config.total, r = arc_config.radius;
+		var value = arc_config.value, total = arc_config.total, r = arc_config.radius,
+		title = arc_config.title;
 
 		var alpha = 360 / total * value, a = (90 - alpha) * Math.PI / 180, x = ox
 				+ r * Math.cos(a), y = oy - r * Math.sin(a), color = arc_config.color
@@ -70,7 +81,8 @@ Donut.prototype.draw = function() {
 
 		return {
 			path : path,
-			stroke : color
+			stroke : color,
+			title:title
 		};
 	};
 
@@ -79,7 +91,8 @@ Donut.prototype.draw = function() {
 			value : sum,
 			total : sum,
 			radius : r,
-			color : colors.length > 0 ? colors[0] : null
+			color : colors.length > 0 ? colors[0] : null,
+			title: conf.labelText[1]+":"+(data[1]/sum*100).toFixed(2)+"%"
 		} ]
 	});
 	// part_1.mouseover(function(){
@@ -90,16 +103,25 @@ Donut.prototype.draw = function() {
 			value : data[0],
 			total : sum,
 			radius : r,
-			color : colors.length > 0 ? colors[1] : null
+			color : colors.length > 0 ? colors[1] : null,
+			title: conf.labelText[0]+":"+(data[0]/sum*100).toFixed(2)+"%"
 		} ]
 	});
 
 	var alpha = 180 / sum * data[0], offset = conf.labelOffset, a = (90 - alpha)
 			* Math.PI / 180, x = ox + (r + offset) * Math.cos(a), y = oy
-			- (r + offset) * Math.sin(a);
-	var text_1 = R.text(x, y, conf.labelText[0]).attr(conf.labelTextStyle);
+			- (r + offset) * Math.sin(a),
+		text1 = conf.labelText[0];
+	var text_1 = R.text(x, y-10, text1).attr(conf.labelTextStyle);
+	var text_1_data = R.text(x+2, y+10, (data[0]/sum*100).toFixed(0)+"%")
+						.attr(conf.labelDataStyle)
+							.attr({fill:colors[1]});
 	alpha = 180 / sum * data[1], a = (90 - alpha) * Math.PI / 180, x = ox
-			- (r + offset) * Math.cos(a), y = oy - (r + offset) * Math.sin(a);
-	var text_2 = R.text(x, y, conf.labelText[1]).attr(conf.labelTextStyle);
-
+			- (r + offset) * Math.cos(a), y = oy - (r + offset) * Math.sin(a),
+			text2 = conf.labelText[1];
+	var text_2 = R.text(x, y-10, text2)
+					.attr(conf.labelTextStyle);
+	var text_2_data = R.text(x, y+10, (data[1]/sum*100).toFixed(0)+"%")
+						.attr(conf.labelDataStyle)
+							.attr({fill:colors[0]});
 };
