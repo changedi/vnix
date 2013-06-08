@@ -38,17 +38,18 @@ function Radar(container, config, data) {
 	this.defaults.dataLabelStyle = {
 		'stroke':'none',
 		'fill':'#468BE6',
-		'font-size':12,
+		'font-size':12
 	};
 	this.defaults.dataLabelOffset = 8;
 	this.defaults.animFactor = 1.2;
 
 	this.defaults.rotateDeg = 15;
 
-	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
-
 	this.setConfig(config);
 	this.setData(data);
+	
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
+
 };
 
 Radar.prototype.setConfig = function(config) {
@@ -162,7 +163,7 @@ Radar.prototype.draw = function() {
 	var dataShape = {
 		data:[],
 		lines : [],
-		labels : [],
+		labels : []
 	},current;
 	for(var i=0;i<data.length;i++){
 		var ra = (data[i]/max * r);
@@ -175,7 +176,7 @@ Radar.prototype.draw = function() {
 		
 		(function(circle,index){
 			circle[0].style.cursor = "default";
-			var thisR = circle.attrs.r*animFactor*data[index]/min;
+			var thisR = circle.attrs.r*animFactor;
 			var thisFill = circle.attrs.fill;
 			var thisX = circle.attrs.cx;
 			var thisY = circle.attrs.cy;
