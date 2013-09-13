@@ -5,27 +5,33 @@ function Column(container, config, data) {
 	this.defaults.height = 400;
 
 	this.defaults.axisStyle = {
-		stroke : "#FFF",
+		stroke : "#000",
 		'stroke-width' : 1,
 		fill : '#0ff'
 	};
+	this.defaults.yAxisStyle = {
+			stroke : "#000",
+			'stroke-width' : 1,
+			fill : '#0ff'
+		};
 	this.defaults.axisInterval = 4;
 	this.defaults.axisGridStyle = {
-		stroke : "#FFF",
+		stroke : "#000",
 		'stroke-width' : 0.5,
 		fill : '#0ff',
 		'stroke-dasharray' : '. '
 	};
 	this.defaults.axisLabelStyle={
-		fill : "#FFFFFF",
+		fill : "#000",
 		"font-size" : 14	
 	};
 	this.defaults.labelText = [ 'aaa', 'bbb' ];
 	this.defaults.labelOffsetX = 10;
 	this.defaults.labelOffsetY = 15;
 	this.defaults.showDataLabel = true;
+	this.defaults.showYAxis = true;
 	this.defaults.labelDataStyle = {
-		fill : "#FFFFFF",
+		fill : "#000",
 		"font-size" : 12
 	};
 	this.defaults.lineTitle = [ 'aaa', 'bbb' ];
@@ -43,10 +49,11 @@ function Column(container, config, data) {
 		'fill-opacity':.75
 	}
 
-	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
-
 	this.setConfig(config);
 	this.setData(data);
+
+	this.raphael = Raphael(container, this.defaults.width, this.defaults.height);
+
 };
 
 Column.prototype.setConfig = function(config) {
@@ -88,6 +95,8 @@ Column.prototype.draw = function() {
 		labelDataStyle = conf.labelDataStyle,
 		rectStyle = conf.rectStyle,
 		showDataLabel = conf.showDataLabel,
+		showYAxis = conf.showYAxis,
+		yAxisStyle = conf.yAxisStyle,
 		axisLabelStyle = conf.axisLabelStyle,
 		param = {
 			stroke : "#fff",
@@ -117,8 +126,14 @@ Column.prototype.draw = function() {
 		labels:[]
 	}, yAxis = {
 		interval : innerBox.height / (axisInterval),
-		// line : line(R, innerBox.ox, innerBox.oy, innerBox.ox,
-		// 		(innerBox.oy - innerBox.height), axisGridStyle),
+		line : function(){
+						if(showYAxis){
+							return line(R, innerBox.ox, innerBox.oy, innerBox.ox,
+									(innerBox.oy - innerBox.height), yAxisStyle)
+						}
+						else
+							return null
+		 		}(),
 		labels:[]
 	};
 
@@ -141,16 +156,24 @@ Column.prototype.draw = function() {
 	};
 
 	var yInterval = maxDigit(max);
-	var tmp = Math.round(max/(axisInterval*yInterval));
-	if(tmp<max/(axisInterval*yInterval)){
-		tmp = tmp+0.5;
+	// var tmp = Math.round(max/(axisInterval*yInterval));
+	// if(tmp<max/(axisInterval*yInterval)){
+	// 	tmp = tmp+0.5;
+	// }
+	var tmp = max/yInterval-Math.floor(max/yInterval);
+	if(tmp<0.5){
+		tmp = (0.5+Math.floor(max/yInterval))/axisInterval;
+	} else{
+		tmp = (1+Math.floor(max/yInterval))/axisInterval;
 	}
 	yInterval = tmp*yInterval;
 	for ( var i = 0; i < axisInterval; i++) {
 		var x = innerBox.ox, y = innerBox.oy - yAxis.interval * (i + 1);
 		yAxisGrid.line[i] = line(R, x, y, x + innerBox.width, y, axisGridStyle);
-		// yAxis.labels[i] = R.text(x - labelOffsetY, y,
-		// 		(yInterval*(i+1)).toFixed(0)).attr(axisLabelStyle);
+		if(showYAxis){
+			yAxis.labels[i] = R.text(x - labelOffsetY, y,
+			 		(yInterval*(i+1)).toFixed(0)).attr(axisLabelStyle);
+		}
 	}
 
 	var tooltipStyle = {
@@ -175,7 +198,7 @@ Column.prototype.draw = function() {
 		dataRect.labels[i] = R
 		.text(
 				innerBox.ox + xAxis.interval * (i + 1)
-						- xAxis.interval / 2, y - 10, data[i])
+						- xAxis.interval / 2, y - 10, (data[i]/sum*100).toFixed(2)+'%')
 		.attr(labelDataStyle).hide();
 		if (showDataLabel) {
 			dataRect.labels[i].show();
