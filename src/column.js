@@ -48,6 +48,26 @@ function Column(container, config, data) {
 		stroke:'none',
 		'fill-opacity':.75
 	}
+	
+	this.defaults.yAxisFormat = function(datax){
+		if(!isNaN(datax)){
+			if(datax>10000)
+				return parseInt(datax/1000)+'k';
+			else
+				return datax;
+		}
+	};
+	
+	this.defaults.title = {
+			enable: false,
+			text:"title x",
+			x:10,
+			y:10,
+			style : {
+					fill : "#000",
+					"font-size" : 14	
+			}
+	}
 
 	this.setConfig(config);
 	this.setData(data);
@@ -98,12 +118,18 @@ Column.prototype.draw = function() {
 		showYAxis = conf.showYAxis,
 		yAxisStyle = conf.yAxisStyle,
 		axisLabelStyle = conf.axisLabelStyle,
+		yAxisFormat = conf.yAxisFormat,
+		title = conf.title,
 		param = {
 			stroke : "#fff",
 			"stroke-width" : conf.boxLineWidth
 		};
 
 	var box = R.rect(0, 0, conf.width, conf.height).attr(param);
+	
+	if(title.enable==true){
+		var titleText = R.text(title.x,title.y,title.text).attr(title.style);
+	}
 
 	var sum = 0, max = 0, min = Number.MAX_VALUE;
 	for ( var i = 0; i < data.length; i++) {
@@ -172,7 +198,7 @@ Column.prototype.draw = function() {
 		yAxisGrid.line[i] = line(R, x, y, x + innerBox.width, y, axisGridStyle);
 		if(showYAxis){
 			yAxis.labels[i] = R.text(x - labelOffsetY, y,
-			 		(yInterval*(i+1)).toFixed(0)).attr(axisLabelStyle);
+					yAxisFormat((yInterval*(i+1)).toFixed(0))).attr(axisLabelStyle);
 		}
 	}
 
