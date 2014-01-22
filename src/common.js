@@ -1,3 +1,9 @@
+function log(msg,debug){
+	if(debug==null || !debug)
+		console.log(msg);
+	return;
+}
+
 function line(R,sx,sy,tx,ty,attr){
 	return R.path("M"+sx+" "+sy+"L"+tx+" "+ty).attr(attr);
 };
